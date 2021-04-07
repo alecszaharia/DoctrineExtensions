@@ -2,8 +2,10 @@
 
 namespace Gedmo\Loggable\Mapping\Event\Adapter;
 
-use Gedmo\Mapping\Event\Adapter\ODM as BaseAdapterODM;
+use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\Persistence\ObjectManager;
 use Gedmo\Loggable\Mapping\Event\LoggableAdapter;
+use Gedmo\Mapping\Event\Adapter\ODM as BaseAdapterODM;
 
 /**
  * Doctrine event adapter for ODM adapted
@@ -33,14 +35,14 @@ final class ODM extends BaseAdapterODM implements LoggableAdapter
     /**
      * {@inheritDoc}
      */
-    public function getNewVersion($meta, $object)
+    public function getNewVersion($meta, $object, $ldm)
     {
         $dm = $this->getObjectManager();
         $objectMeta = $dm->getClassMetadata(get_class($object));
         $identifierField = $this->getSingleIdentifierFieldName($objectMeta);
         $objectId = $objectMeta->getReflectionProperty($identifierField)->getValue($object);
 
-        $qb = $dm->createQueryBuilder($meta->name);
+        $qb = $ldm->createQueryBuilder($meta->name);
         $qb->select('version');
         $qb->field('objectId')->equals($objectId);
         $qb->field('objectClass')->equals($objectMeta->name);
@@ -56,4 +58,5 @@ final class ODM extends BaseAdapterODM implements LoggableAdapter
 
         return $result;
     }
+
 }

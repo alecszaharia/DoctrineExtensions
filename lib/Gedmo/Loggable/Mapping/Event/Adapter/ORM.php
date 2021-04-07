@@ -2,8 +2,9 @@
 
 namespace Gedmo\Loggable\Mapping\Event\Adapter;
 
-use Gedmo\Mapping\Event\Adapter\ORM as BaseAdapterORM;
+use Doctrine\Persistence\ObjectManager;
 use Gedmo\Loggable\Mapping\Event\LoggableAdapter;
+use Gedmo\Mapping\Event\Adapter\ORM as BaseAdapterORM;
 
 /**
  * Doctrine event adapter for ORM adapted
@@ -33,18 +34,18 @@ final class ORM extends BaseAdapterORM implements LoggableAdapter
     /**
      * {@inheritDoc}
      */
-    public function getNewVersion($meta, $object)
+    public function getNewVersion($meta, $object, $lem)
     {
         $em = $this->getObjectManager();
         $objectMeta = $em->getClassMetadata(get_class($object));
         $identifierField = $this->getSingleIdentifierFieldName($objectMeta);
-        $objectId = (string) $objectMeta->getReflectionProperty($identifierField)->getValue($object);
+        $objectId = (string)$objectMeta->getReflectionProperty($identifierField)->getValue($object);
 
         $dql = "SELECT MAX(log.version) FROM {$meta->name} log";
         $dql .= " WHERE log.objectId = :objectId";
         $dql .= " AND log.objectClass = :objectClass";
 
-        $q = $em->createQuery($dql);
+        $q = $lem->createQuery($dql);
         $q->setParameters(array(
             'objectId' => $objectId,
             'objectClass' => $objectMeta->name,
@@ -52,4 +53,5 @@ final class ORM extends BaseAdapterORM implements LoggableAdapter
 
         return $q->getSingleScalarResult() + 1;
     }
+
 }

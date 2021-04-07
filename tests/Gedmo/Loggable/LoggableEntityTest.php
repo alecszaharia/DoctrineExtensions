@@ -2,6 +2,8 @@
 
 namespace Gedmo\Loggable;
 
+use Doctrine\Common\Persistence\AbstractManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Loggable\Fixture\Entity\GeoLocation;
 use Tool\BaseTestCaseORM;
 use Doctrine\Common\EventManager;
@@ -32,13 +34,19 @@ class LoggableEntityTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager();
         $this->LoggableListener = new LoggableListener();
-        $this->LoggableListener->setUsername('jules');
+
+        $evm = new EventManager();
         $evm->addEventSubscriber($this->LoggableListener);
 
-        $this->em = $this->getMockSqliteEntityManager($evm);
+        $this->getMockSqliteEntityManager($evm);
+
+        $registry = $this->getDoctrineRegistryMock($this->em);
+
+        $this->LoggableListener->setUsername('jules');
+        $this->LoggableListener->setRegistry($registry);
     }
+
 
     /**
      * @test
