@@ -2,8 +2,8 @@
 
 namespace Gedmo\Loggable\Mapping\Event\Adapter;
 
-use Gedmo\Loggable\Mapping\Event\LoggableAdapter;
 use Gedmo\Mapping\Event\Adapter\ODM as BaseAdapterODM;
+use Gedmo\Loggable\Mapping\Event\LoggableAdapter;
 
 /**
  * Doctrine event adapter for ODM adapted
@@ -15,7 +15,7 @@ use Gedmo\Mapping\Event\Adapter\ODM as BaseAdapterODM;
 final class ODM extends BaseAdapterODM implements LoggableAdapter
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getDefaultLogEntryClass()
     {
@@ -23,7 +23,7 @@ final class ODM extends BaseAdapterODM implements LoggableAdapter
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isPostInsertGenerator($meta)
     {
@@ -31,16 +31,16 @@ final class ODM extends BaseAdapterODM implements LoggableAdapter
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function getNewVersion($meta, $object)
+    public function getNewVersion($meta, $object,$lom)
     {
         $dm = $this->getObjectManager();
         $objectMeta = $dm->getClassMetadata(get_class($object));
         $identifierField = $this->getSingleIdentifierFieldName($objectMeta);
         $objectId = $objectMeta->getReflectionProperty($identifierField)->getValue($object);
 
-        $qb = $dm->createQueryBuilder($meta->name);
+        $qb = $lom->createQueryBuilder($meta->name);
         $qb->select('version');
         $qb->field('objectId')->equals($objectId);
         $qb->field('objectClass')->equals($objectMeta->name);

@@ -197,7 +197,7 @@ abstract class BaseTestCaseOM extends \PHPUnit\Framework\TestCase
             $this->evm = new EventManager();
             $this->evm->addEventSubscriber(new TreeListener());
             $this->evm->addEventSubscriber(new SluggableListener());
-            $this->evm->addEventSubscriber(new LoggableListener());
+            //$this->evm->addEventSubscriber(new LoggableListener());
             $this->evm->addEventSubscriber(new TranslatableListener());
             $this->evm->addEventSubscriber(new TimestampableListener());
         }
