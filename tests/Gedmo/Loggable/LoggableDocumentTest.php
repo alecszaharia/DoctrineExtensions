@@ -2,10 +2,12 @@
 
 namespace Gedmo\Loggable;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\EventManager;
 use Loggable\Fixture\Document\Article;
 use Loggable\Fixture\Document\Author;
 use Loggable\Fixture\Document\Comment;
+use Loggable\Fixture\Document\Log\PageRevision;
 use Loggable\Fixture\Document\RelatedArticle;
 use Tool\BaseTestCaseMongoODM;
 
@@ -32,8 +34,17 @@ class LoggableDocumentTest extends BaseTestCaseMongoODM
         $evm = new EventManager();
         $loggableListener = new LoggableListener();
         $loggableListener->setUsername('jules');
-        $evm->addEventSubscriber($loggableListener);
 
+        $registry = $this->getMockBuilder(Registry::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $registry->method('getManagerForClass')->with(PageRevision::class)->willReturn($this->dm);
+        //$registry->method('getManagerForClass')->with(Page::class)->willReturn($this->em);
+
+        $loggableListener->setRegistry($registry);
+
+        $evm->addEventSubscriber($loggableListener);
         $this->getMockDocumentManager($evm);
     }
 

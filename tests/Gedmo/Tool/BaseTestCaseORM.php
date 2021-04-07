@@ -2,11 +2,13 @@
 
 namespace Tool;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\Persistence\ManagerRegistry;
 use Gedmo\Loggable\LoggableListener;
 use Gedmo\Sluggable\SluggableListener;
 use Gedmo\SoftDeleteable\SoftDeleteableListener;
@@ -43,6 +45,15 @@ abstract class BaseTestCaseORM extends \PHPUnit\Framework\TestCase
      */
     protected function setUp(): void
     {
+    }
+
+    protected function getDoctrineRegistryMock()
+    {
+        $mock = $this->getMockBuilder(Registry::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        return $mock;
     }
 
     /**
@@ -197,10 +208,19 @@ abstract class BaseTestCaseORM extends \PHPUnit\Framework\TestCase
         $evm = new EventManager();
         $evm->addEventSubscriber(new TreeListener());
         $evm->addEventSubscriber(new SluggableListener());
-        $evm->addEventSubscriber(new LoggableListener());
         $evm->addEventSubscriber(new TranslatableListener());
         $evm->addEventSubscriber(new TimestampableListener());
         $evm->addEventSubscriber(new SoftDeleteableListener());
+
+        $this->getMockSqliteEntityManager($evm);
+
+        $registry = $this->getDoctrineRegistryMock($this->em);
+
+        $loggableListener = new LoggableListener();
+        $loggableListener->setUsername('jules');
+        $loggableListener->setRegistry($registry);
+
+        $evm->addEventSubscriber($loggableListener);
 
         return $evm;
     }

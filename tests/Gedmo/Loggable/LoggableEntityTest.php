@@ -2,14 +2,14 @@
 
 namespace Gedmo\Loggable;
 
+use Loggable\Fixture\Entity\GeoLocation;
+use Tool\BaseTestCaseORM;
 use Doctrine\Common\EventManager;
 use Loggable\Fixture\Entity\Address;
 use Loggable\Fixture\Entity\Article;
 use Loggable\Fixture\Entity\Comment;
 use Loggable\Fixture\Entity\Geo;
-use Loggable\Fixture\Entity\GeoLocation;
 use Loggable\Fixture\Entity\RelatedArticle;
-use Tool\BaseTestCaseORM;
 
 /**
  * These are tests for loggable behavior
@@ -34,13 +34,20 @@ class LoggableEntityTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager();
         $this->LoggableListener = new LoggableListener();
-        $this->LoggableListener->setUsername('jules');
+
+        $evm = new EventManager();
         $evm->addEventSubscriber($this->LoggableListener);
 
-        $this->em = $this->getMockSqliteEntityManager($evm);
+        $this->getMockSqliteEntityManager($evm);
+
+        $registry = $this->getDoctrineRegistryMock();
+        $registry->expects(self::any())->method('getManagerForClass')->willReturn($this->em);
+
+        $this->LoggableListener->setUsername('jules');
+        $this->LoggableListener->setRegistry($registry);
     }
+
 
     /**
      * @test
