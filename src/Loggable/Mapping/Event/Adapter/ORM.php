@@ -9,7 +9,6 @@
 
 namespace Gedmo\Loggable\Mapping\Event\Adapter;
 
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Gedmo\Loggable\Entity\LogEntry;
 use Gedmo\Loggable\Mapping\Event\LoggableAdapter;
 use Gedmo\Mapping\Event\Adapter\ORM as BaseAdapterORM;
@@ -27,26 +26,27 @@ final class ORM extends BaseAdapterORM implements LoggableAdapter
         return LogEntry::class;
     }
 
+
     /**
-     * @param ClassMetadata $meta
+     * {@inheritdoc}
      */
     public function isPostInsertGenerator($meta)
     {
         return $meta->idGenerator->isPostInsertGenerator();
     }
 
-    public function getNewVersion($meta, $object)
+    public function getNewVersion($meta, $object, $lem)
     {
         $em = $this->getObjectManager();
         $objectMeta = $em->getClassMetadata(get_class($object));
         $identifierField = $this->getSingleIdentifierFieldName($objectMeta);
-        $objectId = (string) $objectMeta->getReflectionProperty($identifierField)->getValue($object);
+        $objectId = (string)$objectMeta->getReflectionProperty($identifierField)->getValue($object);
 
         $dql = "SELECT MAX(log.version) FROM {$meta->getName()} log";
         $dql .= ' WHERE log.objectId = :objectId';
         $dql .= ' AND log.objectClass = :objectClass';
 
-        $q = $em->createQuery($dql);
+        $q = $lem->createQuery($dql);
         $q->setParameters([
             'objectId' => $objectId,
             'objectClass' => $objectMeta->getName(),
@@ -54,4 +54,5 @@ final class ORM extends BaseAdapterORM implements LoggableAdapter
 
         return $q->getSingleScalarResult() + 1;
     }
+
 }

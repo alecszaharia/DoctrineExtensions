@@ -10,6 +10,7 @@
 namespace Gedmo\Loggable\Mapping\Event;
 
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectManager;
 use Gedmo\Mapping\Event\AdapterInterface;
 
 /**
@@ -41,8 +42,10 @@ interface LoggableAdapter extends AdapterInterface
      *
      * @param ClassMetadata $meta
      * @param object        $object
+     * @param object $om Object Manager of the LogEntry class
      *
      * @return int
      */
-    public function getNewVersion($meta, $object);
+    public function getNewVersion($meta, $object, $om);
+
 }
