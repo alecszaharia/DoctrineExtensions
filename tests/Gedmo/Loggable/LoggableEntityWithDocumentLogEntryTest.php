@@ -3,9 +3,9 @@
 namespace Gedmo\Loggable;
 
 use Doctrine\Common\Persistence\AbstractManagerRegistry;
-use Doctrine\Persistence\ManagerRegistry;
 use Loggable\Fixture\Entity\GeoLocation;
-use Tool\BaseTestCaseORM;
+use Loggable\Fixture\Entity\Page;
+use Tool\BaseTestCaseOM;
 use Doctrine\Common\EventManager;
 use Loggable\Fixture\Entity\Address;
 use Loggable\Fixture\Entity\Article;
@@ -16,19 +16,17 @@ use Loggable\Fixture\Entity\Geo;
 /**
  * These are tests for loggable behavior
  *
- * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @link http://www.gediminasm.org
+ * @author Zaharia Alexandru <alecszaharia@gmail.com>
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
-class LoggableEntityTest extends BaseTestCaseORM
+class LoggableEntityWithDocumentLogEntryTest extends BaseTestCaseOM
 {
-    const ARTICLE = 'Loggable\Fixture\Entity\Article';
-    const COMMENT = 'Loggable\Fixture\Entity\Comment';
-    const RELATED_ARTICLE = 'Loggable\Fixture\Entity\RelatedArticle';
-    const COMMENT_LOG = 'Loggable\Fixture\Entity\Log\Comment';
+    const PAGE = 'Loggable\Fixture\Entity\Page';
+    const PAGE_REVISION = 'Loggable\Fixture\Document\Log\PageRevision';
 
-    private $articleId;
     private $LoggableListener;
+    private $em;
+    private $dm;
 
     protected function setUp()
     {
@@ -39,10 +37,17 @@ class LoggableEntityTest extends BaseTestCaseORM
         $evm = new EventManager();
         $evm->addEventSubscriber($this->LoggableListener);
 
-        $this->getMockSqliteEntityManager($evm);
+        $this->em = $this->getMockSqliteEntityManager(array(),$this->getDefaultORMMetadataDriverImplementation());
+        $this->dm = $this->getMockDocumentManager('fdsdf',$this->getDefaultMongoODMMetadataDriverImplementation());
 
-        $registry = $this->getDoctrineRegistryMock();
-        $registry->expects(self::any())->method('getManagerForClass')->willReturn($this->em);
+
+        $registry = $this->getMockBuilder(AbstractManagerRegistry::classs)
+                     ->disableOriginalConstructor()
+                     ->setMethods(array('getManagerForClass','setService','getService','resetService','getAliasNamespace'))
+                     ->getMock();
+
+        $registry->expects(self::PAGE)->method('getManagerForClass')->willReturn($this->em);
+        $registry->expects(self::PAGE_REVISION)->method('getManagerForClass')->willReturn($this->dm);
 
         $this->LoggableListener->setUsername('jules');
         $this->LoggableListener->setRegistry($registry);
@@ -54,13 +59,13 @@ class LoggableEntityTest extends BaseTestCaseORM
      */
     public function shouldHandleClonedEntity()
     {
-        $art0 = new Article();
-        $art0->setTitle('Title');
+        $pag0 = new Page();
+        $pag0->setTitle('Title');
 
-        $this->em->persist($art0);
+        $this->em->persist($pag0);
         $this->em->flush();
 
-        $art1 = clone $art0;
+        $art1 = clone $pag0;
         $art1->setTitle('Cloned');
         $this->em->persist($art1);
         $this->em->flush();

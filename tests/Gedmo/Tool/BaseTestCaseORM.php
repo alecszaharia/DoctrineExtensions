@@ -59,14 +59,12 @@ abstract class BaseTestCaseORM extends \PHPUnit\Framework\TestCase
         return parent::expectException($exception);
     }
 
-    protected function getDoctrineRegistryMock($manager)
+    protected function getDoctrineRegistryMock()
     {
         $mock = $this->getMockBuilder(AbstractManagerRegistry::class)
             ->disableOriginalConstructor()
             ->setMethods(array('getManagerForClass','setService','getService','resetService','getAliasNamespace'))
             ->getMock();
-
-        $mock->expects(self::any())->method('getManagerForClass')->willReturn($manager);
 
         return $mock;
     }

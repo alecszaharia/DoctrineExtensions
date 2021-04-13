@@ -3,9 +3,9 @@
 namespace Gedmo\Loggable;
 
 use Doctrine\Common\EventArgs;
+use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
-use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\ObjectManager;
 use Gedmo\Loggable\Mapping\Event\LoggableAdapter;
 use Gedmo\Mapping\MappedEventSubscriber;
 use Gedmo\Tool\Wrapper\AbstractWrapper;
@@ -95,7 +95,7 @@ class LoggableListener extends MappedEventSubscriber
     /**
      * @param ManagerRegistry $registry
      */
-    public function setRegistry(ManagerRegistry $registry): void
+    public function setRegistry(ManagerRegistry $registry)
     {
         $this->registry = $registry;
     }
